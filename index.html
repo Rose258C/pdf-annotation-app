@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF标注与隐藏应用</title    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/page-selector.css">
+    <link rel="stylesheet" href="css/underline.css">
+    <link rel="stylesheet" href="css/word-document.css">
+</head>
+<body>
+    <!-- PDF.js库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    <script>
+        // 设置PDF.js工作路径
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 顶部工具栏 -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button id="upload-btn" class="btn primary">上传PDF</button>
+                <input type="file" id="file-input" accept=".pdf" style="display: none;">
+                <div class="page-navigation">
+                    <button id="prev-page" class="btn nav-btn" disabled>&lt;</button>
+                    <span id="page-info">0/0</span>
+                    <button id="next-page" class="btn nav-btn" disabled>&gt;</button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button id="complete-btn" class="btn secondary" disabled>完成</button>
+            </div>
+        </div>
+
+        <!-- 编辑模式工具栏 (初始隐藏) -->
+        <div id="edit-toolbar" class="edit-toolbar hidden">
+            <div class="annotation-modes">
+                <button id="mode-red" class="btn mode-btn active" data-color="red">红色</button>
+                <button id="mode-yellow" class="btn mode-btn" data-color="yellow">黄色</button>
+                <button id="mode-blue" class="btn mode-btn" data-color="blue">蓝色</button>
+                <button id="mode-custom" class="btn mode-btn" data-color="custom">自定义</button>
+                <button id="mode-eraser" class="btn mode-btn" data-color="eraser">橡皮擦</button>
+            </div>
+        </div>
+
+        <!-- 自定义颜色选择器 (初始隐藏) -->
+        <div id="color-picker" class="color-picker hidden">
+            <div class="color-picker-content">
+                <h3>自定义颜色</h3>
+                <input type="color" id="custom-color-input" value="#4CAF50">
+                <div class="preset-colors">
+                    <button class="preset-color" style="background-color: #4CAF50;" data-color="#4CAF50"></button>
+                    <button class="preset-color" style="background-color: #9C27B0;" data-color="#9C27B0"></button>
+                    <button class="preset-color" style="background-color: #FF9800;" data-color="#FF9800"></button>
+                    <button class="preset-color" style="background-color: #E91E63;" data-color="#E91E63"></button>
+                </div>
+                <div class="color-picker-buttons">
+                    <button id="color-cancel" class="btn">取消</button>
+                    <button id="color-confirm" class="btn primary">确定</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PDF显示区域 -->
+        <div class="pdf-container">
+            <canvas id="pdf-canvas"></canvas>
+            <div id="text-layer" class="text-layer"></div>
+            <div id="annotation-layer" class="annotation-layer"></div>
+        </div>
+
+        <!-- 底部工具栏 -->
+        <div class="bottom-toolbar">
+            <button id="edit-btn" class="btn primary" disabled>编辑</button>
+            <div id="annotation-controls" class="annotation-controls hidden">
+                <button id="hide-red" class="btn annotation-btn" data-color="red">标注一消失</button>
+                <button id="hide-yellow" class="btn annotation-btn" data-color="yellow">标注二消失</button>
+                <button id="hide-blue" class="btn annotation-btn" data-color="blue">标注三消失</button>
+                <button id="hide-custom" class="btn annotation-btn" data-color="custom">自定义标注消失</button>
+            </div>
+            <button id="edit-complete" class="btn primary edit-complete hidden">编辑完成</button>
+        </div>
+
+        <!-- 保存菜单 (初始隐藏) -->
+        <div id="save-menu" class="save-menu hidden">
+            <div class="save-menu-content">
+                <button id="save-doc" class="btn save-btn">保存文档</button>
+                <button id="save-as" class="btn save-btn">另存为</button>
+            </div>
+        </div>
+
+        <!-- 另存为对话框 (初始隐藏) -->
+        <div id="save-as-dialog" class="modal hidden">
+            <div class="modal-content">
+                <h3>另存为</h3>
+                <div class="form-group">
+                    <label for="filename">文件名:</label>
+                    <input type="text" id="filename" placeholder="输入文件名">
+                </div>
+                <div class="form-group">
+                    <label for="format">格式:</label>
+                    <select id="format">
+                        <option value="pdf">PDF</option>
+                        <option value="docx">Word</option>
+                        <option value="html">HTML</option>
+                        <option value="txt">纯文本</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button id="save-cancel" class="btn">取消</button>
+                    <button id="save-confirm" class="btn primary">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载指示器 -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>处理中，请稍候...</p>
+        </div>
+    </div>
+
+    <!-- 应用脚本 -->
+    <script src="js/pdf-handler.js"></script>
+    <script src="js/annotation.js"></script>
+    <script src="js/visibility-manager.js"></script>
+    <script src="js/document-exporter.js"></script>
+    <script src="js/page-selector.js"></script>
+    <script src="js/underline-manager.js"></script>
+    <script src="js/word-document-handler.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
